@@ -1,11 +1,11 @@
 """Functions to perform multiplex community detection.
 
 This module provides functions to simultaneously analyze the community
-sturcture common to a list of igraph.Graph instances. It works by performing
+structure common to a list of igraph.Graph instances. It works by performing
 spectral partitions of a multiplex modularity matrix, which is formed by
 a block-diagonal arrangement of modularity matrices from each graph and
 sparse off-diagonal entries that serve as the links between different
-networks in the multiplex structure. It refines these paritions with a
+networks in the multiplex structure. It refines these partitions with a
 Kernighan-Lin algorithm and by ensuring the connectivity of each community.
 Networks may be symmetric, directed, or bipartite. Weighted and unweighted
 networks are both supported. 
@@ -63,7 +63,7 @@ instance may be assigned its own 'resolution' attribute as follows::
     g['resolution'] = gamma_g
     h['resolution'] = gamma_h
 
-where gamma_g and gamma_h modify the penalty for grouping unconnected nodes 
+where gamma_g and gamma_h modify the penalty for grouping unconnected vertices 
 in the same community. Higher values yield smaller communities.
 """
 __version__ = '1.0'
@@ -86,7 +86,7 @@ def multiplex_modularity(B, mu, membership):
 
     Args:
         B (scipy.sparse.csr_matrix): An n by n sparse modularity matrix where
-            n is the number of nodes across all networks.
+            n is the number of vertices across all networks.
 
         mu (float): The total multislice strength (see Mucha et al. 2010).
 
@@ -115,7 +115,7 @@ def multiplex_modularity(B, mu, membership):
 
 def multiplex_leading_eigenvector(net_list, w, net_types, weight='weight',
                                   id_attr='name', verbose=False):
-    """Partitions nodes from multiple networks into communities.
+    """Partitions vertices from multiple networks into communities.
 
     Detect communities using a multiplex adaptation of Newman's (2006) leading
     eigenvector method.
@@ -131,7 +131,7 @@ def multiplex_leading_eigenvector(net_list, w, net_types, weight='weight',
             {(i, j): interslice_weight for i, j in
             itertools.permutation(range(len(net_list)), 2)}
 
-        net_types (list): Countains strings specifying the modularity equation
+        net_types (list): Contains strings specifying the modularity equation
             to use for each Graph instance in net_list. Can include::
 
                 's' -- symmetric
@@ -140,11 +140,11 @@ def multiplex_leading_eigenvector(net_list, w, net_types, weight='weight',
              
         weight (str): Attribute specifying edge weight. Defaults to 'weight'.
             Use None to specify using edge count.
-        id_attr (str): Attribute for matching node identities across slices.
+        id_attr (str): Attribute for matching vertex identities across slices.
             Defaults to 'name'.
 
     Returns:
-        list. Community ids of each node.
+        list. Community ids of each vertex.
     """
     B, mu = get_modularity_matrix(net_list, w, net_types,
                                   weight=weight, id_attr=id_attr)
@@ -206,7 +206,7 @@ def _recursive_split(B, g, membership, m1, m2, mu, verbose=False):
 
     Args:
         B (scipy.sparse.csr_matrix): An n by n sparse modularity matrix where
-            n is the number of nodes across all networks.
+            n is the number of vertices across all networks.
         g (igraph.Graph): Holds the multislice representation of
             the networks used to form B
         membership (list): Community ids
@@ -237,7 +237,7 @@ def _attempt_split(B, g, membership, target, mu, verbose=False):
     Args:
 
         B (scipy.sparse.csr_matrix): An n by n sparse modularity matrix where
-            n is the number of nodes across all networks.
+            n is the number of vertices across all networks.
         g (igraph.Graph): Holds the multislice representation of the networks
             used to form B.
         membership (list): Community ids.
@@ -249,7 +249,7 @@ def _attempt_split(B, g, membership, target, mu, verbose=False):
     Returns:
         int.  Id of new community if one is found, else False
     """
-    # Select all nodes in target community.
+    # Select all vertices in target community.
     idxs = [i for i, m in enumerate(membership) if m == target]
 
     # Submatrix of community to be split.
@@ -339,7 +339,7 @@ def get_modularity_matrix(net_list, w, net_types,
 
     Calculates the modularity matrix for a group of multiplex networks.
     Networks can be either weighted or unweighted and symmetric, directed, and
-    bipartite. Bipartite graphs require that nodes are sorted by type, and
+    bipartite. Bipartite graphs require that vertices are sorted by type, and
     thus that all edges are observed on the off-diagonal blocks of the
     adjacency matrix.
 
@@ -354,7 +354,7 @@ def get_modularity_matrix(net_list, w, net_types,
             {(i, j): interslice_weight for i, j in
             itertools.permutation(range(len(net_list)), 2)}
 
-        net_types (list): Countains strings specifying the modularity equation
+        net_types (list): Contains strings specifying the modularity equation
             to use for each Graph instance in net_list. Can include::
 
                 's' -- symmetric
@@ -363,14 +363,14 @@ def get_modularity_matrix(net_list, w, net_types,
              
         weight (str): Attribute specifying edge weight. Defaults to 'weight'.
             Use None to specify using edge count.
-        id_attr (str): Attribute for matching node identities across slices.
+        id_attr (str): Attribute for matching vertex identities across slices.
             Defaults to 'name'.
 
     Returns:
         scipy.sparse.csr_matrix. A modularity matrix composed of block-diagonal
         modularity matrices specific to each network type and manually
         specified links across networks.
-        float. A meausre of multislice strength.
+        float. A measure of multislice strength.
     """
     for net in net_list:
         if weight not in net.es.attribute_names():
@@ -396,7 +396,7 @@ def _diag_modularity(net_list, net_types, weight='weight', id_attr='name'):
 
     Calculates the intra-slice modularity matrices for a group of
     multiplex networks. Networks can be either weighted or unweighted and
-    symmetric, directed, and bipartite. Bipartite graphs require that nodes
+    symmetric, directed, and bipartite. Bipartite graphs require that vertices
     are sorted by type, and thus that all edges are observed on the
     off-diagonal blocks of the adjacency matrix.
 
@@ -406,7 +406,7 @@ def _diag_modularity(net_list, net_types, weight='weight', id_attr='name'):
             multislice network jointly defined by the graphs and the w
             parameters should have exactly one component.
 
-        net_types (list): Countains strings specifying the modularity equation
+        net_types (list): Contains strings specifying the modularity equation
             to use for each Graph instance in net_list. Can include::
 
                 's' -- symmetric
@@ -416,13 +416,13 @@ def _diag_modularity(net_list, net_types, weight='weight', id_attr='name'):
         weight (str): Attribute specifying edge weight. Defaults to 'weight'.
             Use None to specify using edge count.
   
-        id_attr (str): Attribute for matching node identities across slices.
+        id_attr (str): Attribute for matching vertex identities across slices.
             Defaults to 'name'.
 
     Returns:
         scipy.sparse.block_diag. A modularity matrix composed of block-diagonal
         modularity matrices specific to each network type.
-        float. A meausre of intra-slice strength.
+        float. A measure of intra-slice strength.
     """
 
     n = sum([len(g.vs) for g in net_list])
@@ -518,7 +518,7 @@ def _multislice_connections(net_list, w, mu, id_attr='name'):
             itertools.permutation(range(len(net_list)), 2)}
 
 
-        net_types (list): Countains strings specifying the modularity equation
+        net_types (list): Contains strings specifying the modularity equation
             to use for each Graph instance in net_list. Can include::
 
                 's' -- symmetric
@@ -528,13 +528,13 @@ def _multislice_connections(net_list, w, mu, id_attr='name'):
         weight (str): Attribute specifying edge weight. Defaults to 'weight'.
             Use None to specify using edge count.
 
-        id_attr (str): Attribute for matching node identities across slices.
+        id_attr (str): Attribute for matching vertex identities across slices.
             Defaults to 'name'.
 
     Returns:
         scipy.sparse.csr_matrix. A modularity matrix composed of the manually
             specified links across networks.
-        float. A meausre of inter-slice strength.
+        float. A measure of inter-slice strength.
     """
     # Populate a dictionary mapping vertex names to their index
     for g in net_list:
@@ -606,14 +606,14 @@ def _multislice_connections(net_list, w, mu, id_attr='name'):
 def KL_refinement(B, membership, mu, verbose=False):
     """Improves a given two-way partition using the KL algorithm.
 
-    Searches for higher-modularity partitions by switching each node once in
+    Searches for higher-modularity partitions by switching each vertex once in
     the order of the change in modularity resulting from the move. For larger
-    sets of networks with a total of over 10,000 nodes, the algorithm will
+    sets of networks with a total of over 10,000 vertices, the algorithm will
     cease searching for a better partition after 2000 failed attempts.
 
     Args:
         B (scipy.sparse.csr_matrix): An n by n sparse modularity matrix where
-            n is the number of nodes across all networks.
+            n is the number of vertices across all networks.
 
         membership (list): A vector of community ids of length n.
 
@@ -648,7 +648,7 @@ def KL_refinement(B, membership, mu, verbose=False):
     DQ = w - 2*Q
     DQ = DQ.tolist()[0]
 
-    # Make a set to keep track of switched nodes.
+    # Make a set to keep track of switched vertices.
     moved = set()
 
     # Make objects to store values over iterations.
@@ -666,12 +666,12 @@ def KL_refinement(B, membership, mu, verbose=False):
 
     consec_fail = 0
 
-    # Move each node exactly once.
+    # Move each vertex exactly once.
     qdata = []
     for k in range(n):
         consec_fail += 1
 
-        # Get unmoved node with maximum change in modularity.
+        # Get unmoved vertex with maximum change in modularity.
         maxdq = max(DQ)
         idx = DQ.index(maxdq)
 
@@ -759,24 +759,24 @@ def KL_refinement(B, membership, mu, verbose=False):
 
 
 def _ensure_connectivity(g):
-    """Reassign nodes not connected to any other community members.
+    """Reassign vertices not connected to any other community members.
 
     Ensure the connectivity of two communities using a single igraph Graph
     instance to represent the combined multislice network. Identifies
-    nodes not connected to other members of their community and switches
+    vertices not connected to other members of their community and switches
     their membership.
 
     Args:
         g (igraph.Graph): Represents the combined multislice
-            network. Each node enters the multislice network one for each
+            network. Each vertex enters the multislice network one for each
             individual network in which it appears. All edges are undirected
             and indicate either an observed tie or a specified connection
-            between the same node in different network slices. Must include
+            between the same vertex in different network slices. Must include
             a 'subgraph_memb' vertex attribute and 'subgraph_membership'
             graph attribute to specify the community structure to examine.
 
     Returns:
-        list. Contains each nodes revised community id.
+        list. Contains each vertex's revised community id.
     """
 
     name2idx = g['name2idx']
@@ -809,7 +809,7 @@ def _ensure_connectivity(g):
                 if t > 1:
                     tie = True
 
-                # Switch community for all nodes not in main component
+                # Switch community for all vertices not in main component
                 for sg in comps.subgraphs():
                     if len(sg.vs)!=main_size:
                         for v in sg.vs:
@@ -840,9 +840,9 @@ def _ensure_connectivity(g):
 def make_multislice_graph(net_list, w):
     """Makes a multislice representation of a list of separate networks.
 
-    Creates a single networ object representing the specified multislice
-    structure. Every node appears once for each network where it is present.
-    Multislice connections occur between different instances of each node
+    Creates a single network object representing the specified multislice
+    structure. Every vertex appears once for each network where it is present.
+    Multislice connections occur between different instances of each vertex
     across networks as specified by w.
 
     Args:
@@ -858,9 +858,9 @@ def make_multislice_graph(net_list, w):
 
     Returns:
         igraph.Graph. Represents the combined multislice network.
-        Each node enters the multislice network once for each network in which
+        Each vertex enters the multislice network once for each network in which
         it appears. All edges are undirected and indicate either an observed
-        tie or a specified connection between the same node in different
+        tie or a specified connection between the same vertex in different
         network slices.
     """
 
