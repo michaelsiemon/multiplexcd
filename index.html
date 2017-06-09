@@ -1,0 +1,348 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Documentation for multiplexcd &#8212; multiplexcd 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="documentation-for-multiplexcd">
+<h1>Documentation for multiplexcd<a class="headerlink" href="#documentation-for-multiplexcd" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-multiplexcd"></span><p>Functions to perform multiplex community detection.</p>
+<p>This module provides functions to simultaneously analyze the community
+structure common to a list of igraph.Graph instances. It works by performing
+spectral partitions of a multiplex modularity matrix, which is formed by
+a block-diagonal arrangement of modularity matrices from each graph and
+sparse off-diagonal entries that serve as the links between different
+networks in the multiplex structure. It refines these partitions with a
+Kernighan-Lin algorithm and by ensuring the connectivity of each community.
+Networks may be symmetric, directed, or bipartite. Weighted and unweighted
+networks are both supported.</p>
+<p>This module relies on the <a class="reference external" href="http://igraph.org/python/doc/igraph-module.html">igraph</a> package for python. With igraph
+installed, an analysis of one symmetric and one directed graph might proceed 
+as follows:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">igraph</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">igraph</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">directed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">g_vertex_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">]</span>
+<span class="n">h_vertex_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">]</span>
+
+<span class="n">g_edges</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">),</span>
+           <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">)]</span>
+<span class="n">h_edges</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">),</span>
+           <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
+           <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">)]</span>
+
+<span class="n">g</span><span class="o">.</span><span class="n">add_vertices</span><span class="p">(</span><span class="n">g_vertex_names</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">add_vertices</span><span class="p">(</span><span class="n">h_vertex_names</span><span class="p">)</span>
+
+<span class="n">g</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">g_edges</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">h_edges</span><span class="p">)</span>
+
+<span class="n">omega</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">net_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
+<span class="n">net_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]</span>
+
+<span class="n">community_ids</span> <span class="o">=</span> <span class="n">multiplexcd</span><span class="o">.</span><span class="n">multiplex_leading_eigenvector</span><span class="p">(</span>
+                    <span class="n">net_list</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">net_types</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To measure the multiplex modularity of an arbitrary community id vector:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;memb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">h</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;memb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">community_ids</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;memb&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;memb&#39;</span><span class="p">]</span>
+
+<span class="n">B</span><span class="p">,</span> <span class="n">mu</span> <span class="o">=</span> <span class="n">multiplexcd</span><span class="o">.</span><span class="n">get_modularity_matrix</span><span class="p">(</span>
+                    <span class="n">net_list</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">net_types</span><span class="p">)</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">multiplexcd</span><span class="o">.</span><span class="n">multiplex_modularity</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">community_ids</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The sets of vertices in each network may differ.</p>
+<p>For bipartite networks, the vertices must be sorted by type so that the
+block-diagonal portions of the network’s adjacency matrix are all 0.</p>
+<p>To alter the size of the communities returned by the algorithm, each Graph
+instance may be assigned its own ‘resolution’ attribute as follows:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gamma_g</span><span class="p">,</span> <span class="n">gamma_h</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span>
+<span class="n">g</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gamma_g</span>
+<span class="n">h</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gamma_h</span>
+</pre></div>
+</div>
+<p>where gamma_g and gamma_h modify the penalty for grouping unconnected vertices 
+in the same community. Higher values yield smaller communities.</p>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="multiplexcd.multiplex_leading_eigenvector">
+<code class="descclassname">multiplexcd.</code><code class="descname">multiplex_leading_eigenvector</code><span class="sig-paren">(</span><em>net_list</em>, <em>w</em>, <em>net_types</em>, <em>weight=’weight’</em>, <em>id_attr=’name’</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#multiplexcd.multiplex_leading_eigenvector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Partitions vertices from multiple networks into communities.</p>
+<p>Detect communities using a multiplex adaptation of Newman’s (2006) leading
+eigenvector method.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>net_list (list): Contains igraph.Graph instances. Each graph may have a</dt>
+<dd>‘resolution’ attribute, which defaults to 1.0 if not specified. The
+multislice network jointly defined by the graphs and the w
+parameters should have exactly one component.</dd>
+</dl>
+<p>w: Float or dictionary of the form:</p>
+<blockquote>
+<div>{(i, j): interslice_weight for i, j in
+itertools.permutation(range(len(net_list)), 2)}</div></blockquote>
+<dl class="last docutils">
+<dt>net_types (list): Contains strings specifying the modularity equation</dt>
+<dd><p class="first">to use for each Graph instance in net_list. Can include:</p>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;s&#39;</span> <span class="o">--</span> <span class="n">symmetric</span>
+<span class="s1">&#39;d&#39;</span> <span class="o">--</span> <span class="n">directed</span>
+<span class="s1">&#39;b&#39;</span> <span class="o">--</span> <span class="n">bipartite</span>
+</pre></div>
+</div>
+</dd>
+<dt>weight (str): Attribute specifying edge weight. Defaults to ‘weight’.</dt>
+<dd>Use None to specify using edge count.</dd>
+<dt>id_attr (str): Attribute for matching vertex identities across slices.</dt>
+<dd>Defaults to ‘name’.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>list. Community ids of each vertex.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="multiplexcd.get_modularity_matrix">
+<code class="descclassname">multiplexcd.</code><code class="descname">get_modularity_matrix</code><span class="sig-paren">(</span><em>net_list</em>, <em>w</em>, <em>net_types</em>, <em>weight=’weight’</em>, <em>id_attr=’name’</em><span class="sig-paren">)</span><a class="headerlink" href="#multiplexcd.get_modularity_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a modularity matrix from a list of networks.</p>
+<p>Calculates the modularity matrix for a group of multiplex networks.
+Networks can be either weighted or unweighted and symmetric, directed, and
+bipartite. Bipartite graphs require that vertices are sorted by type, and
+thus that all edges are observed on the off-diagonal blocks of the
+adjacency matrix.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>net_list (list): Contains igraph.Graph instances. Each graph may have a</dt>
+<dd>‘resolution’ attribute, which defaults to 1.0 if not specified. The
+multislice network jointly defined by the graphs and the w
+parameters should have exactly one component.</dd>
+</dl>
+<p>w: Float or dictionary of the form:</p>
+<blockquote>
+<div>{(i, j): interslice_weight for i, j in
+itertools.permutation(range(len(net_list)), 2)}</div></blockquote>
+<dl class="last docutils">
+<dt>net_types (list): Contains strings specifying the modularity equation</dt>
+<dd><p class="first">to use for each Graph instance in net_list. Can include:</p>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;s&#39;</span> <span class="o">--</span> <span class="n">symmetric</span>
+<span class="s1">&#39;d&#39;</span> <span class="o">--</span> <span class="n">directed</span>
+<span class="s1">&#39;b&#39;</span> <span class="o">--</span> <span class="n">bipartite</span>
+</pre></div>
+</div>
+</dd>
+<dt>weight (str): Attribute specifying edge weight. Defaults to ‘weight’.</dt>
+<dd>Use None to specify using edge count.</dd>
+<dt>id_attr (str): Attribute for matching vertex identities across slices.</dt>
+<dd>Defaults to ‘name’.</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>scipy.sparse.csr_matrix. A modularity matrix composed of block-diagonal
+modularity matrices specific to each network type and manually
+specified links across networks.
+float. A measure of multislice strength.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="multiplexcd.multiplex_modularity">
+<code class="descclassname">multiplexcd.</code><code class="descname">multiplex_modularity</code><span class="sig-paren">(</span><em>B</em>, <em>mu</em>, <em>membership</em><span class="sig-paren">)</span><a class="headerlink" href="#multiplexcd.multiplex_modularity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a multiplex modularity score.</p>
+<p>Calculates the modularity from a given modularity matrix and membership
+vector.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>B (scipy.sparse.csr_matrix): An n by n sparse modularity matrix where</dt>
+<dd>n is the number of vertices across all networks.</dd>
+</dl>
+<p>mu (float): The total multislice strength (see Mucha et al. 2010).</p>
+<p class="last">membership (list): A vector of community ids of length n.</p>
+</dd>
+<dt>Returns:</dt>
+<dd>float. The modularity value.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="multiplexcd.KL_refinement">
+<code class="descclassname">multiplexcd.</code><code class="descname">KL_refinement</code><span class="sig-paren">(</span><em>B</em>, <em>membership</em>, <em>mu</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#multiplexcd.KL_refinement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Improves a given two-way partition using the KL algorithm.</p>
+<p>Searches for higher-modularity partitions by switching each vertex once in
+the order of the change in modularity resulting from the move. For larger
+sets of networks with a total of over 10,000 vertices, the algorithm will
+cease searching for a better partition after 2000 failed attempts.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>B (scipy.sparse.csr_matrix): An n by n sparse modularity matrix where</dt>
+<dd>n is the number of vertices across all networks.</dd>
+</dl>
+<p>membership (list): A vector of community ids of length n.</p>
+<p class="last">mu (float): The total multislice strength (see Mucha et al. 2010).</p>
+</dd>
+<dt>Returns:</dt>
+<dd>Refined community membership list of length N if successful, otherwise
+the bool False</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="multiplexcd.make_multislice_graph">
+<code class="descclassname">multiplexcd.</code><code class="descname">make_multislice_graph</code><span class="sig-paren">(</span><em>net_list</em>, <em>w</em><span class="sig-paren">)</span><a class="headerlink" href="#multiplexcd.make_multislice_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a multislice representation of a list of separate networks.</p>
+<p>Creates a single network object representing the specified multislice
+structure. Every vertex appears once for each network where it is present.
+Multislice connections occur between different instances of each vertex
+across networks as specified by w.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first docutils">
+<dt>net_list (list): Contains igraph.Graph instances. Each graph may have a</dt>
+<dd>‘resolution’ attribute, which defaults to 1.0 if not specified. The
+multislice network jointly defined by the graphs and the w
+parameters should have exactly one component.</dd>
+</dl>
+<p>w: Float or dictionary of the form:</p>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="p">{(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span> <span class="n">interslice_weight</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span>
+<span class="n">itertools</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">net_list</span><span class="p">)),</span> <span class="mi">2</span><span class="p">)}</span>
+</pre></div>
+</div>
+</dd>
+<dt>Returns:</dt>
+<dd>igraph.Graph. Represents the combined multislice network.
+Each vertex enters the multislice network once for each network in which
+it appears. All edges are undirected and indicate either an observed
+tie or a specified connection between the same vertex in different
+network slices.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="references">
+<h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>Barber, Michael J. “Modularity and community detection in bipartite networks.”</dt>
+<dd>Physical Review E 76.6 (2007): 066102.</dd>
+<dt>Leicht, Elizabeth A., and Mark EJ Newman. “Community structure in directed</dt>
+<dd>networks.” Physical Review Letters 100.11 (2008): 118703.</dd>
+<dt>Mucha, Peter J., et al. “Community structure in time-dependent, multiscale,</dt>
+<dd>and multiplex networks.” Science 328.5980 (2010): 876-878.</dd>
+<dt>Newman, Mark EJ. “Modularity and community structure in networks.”</dt>
+<dd>PNAS 103.23 (2006): 8577-8582.</dd>
+</dl>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation for multiplexcd</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Michael Siemon.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
