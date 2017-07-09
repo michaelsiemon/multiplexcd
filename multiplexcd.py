@@ -70,6 +70,7 @@ __version__ = '1.0'
 __author__ = 'Michael Siemon'
 
 import itertools
+from copy import copy
 
 import numpy as np
 import scipy.sparse as sparse
@@ -176,7 +177,7 @@ def multiplex_leading_eigenvector(net_list, w, net_types, weight='weight',
 
         if verbose:
             Q = multiplex_modularity(B, mu, u)
-            print 'Initial_split:', Q, sum(u)
+            print 'Initial_split:', Q, sum(u), len(u)-sum(u)
 
         _recursive_split(B, g, u, 0, 1, mu, verbose=verbose)
 
@@ -594,8 +595,6 @@ def _multislice_connections(net_list, w, mu, id_attr='name'):
     # Delete place-holder ensuring B.shape == (row_idx, row_idx).
     B[row_idx-1, row_idx-1] = 0
 
-    assert B.sum()%2 == 0
-
     return B, mu
 
 # # # # # # # # # # # # #
@@ -831,8 +830,10 @@ def _ensure_connectivity(g):
         counter += 1
         if counter > 100:
             connected = True
-            print 'Warning: loop limit reached. To avoid disconnected'
-            print 'communities, use the '
+            print ''
+            print 'Warning: unconnected communities. To avoid disconnected'
+            print 'communities, use the make_multislice_graph function'
+            print 'to isolate and individually analyze connected components.'
 
     return membership
 
